@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "express": "^4.17.0"
+  },
+  "description": "Hello World App"
+  "main": "server.js",
+  "name": "hello"
+}
