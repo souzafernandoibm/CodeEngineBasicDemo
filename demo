@@ -1,0 +1,30 @@
+#!/bin/bash
+. .demoscript
+
+function cleanup() {
+	ic ce build delete -n mybuild -f > /dev/null 2>&1
+	ic ce buildrun delete -n mybuild-1 -f > /dev/null 2>&1
+}
+
+cleanup
+set -e
+
+comment "Let's show a failing build..."
+
+comment "Notice we don't specify a strategy so it defaults to Dockerfile"
+doit ic ce build create --name mybuild --image ce-demos/job \
+	--registry-secret icr --source https://github.com/duglin/bp-2020-10-15 \
+	--context-dir /job --size xlarge
+
+doit ic ce buildrun submit --build mybuild -n mybuild-1
+
+while true ; do
+  doit ic ce buildrun get -n mybuild-1
+  instance=$(tail -1 out | sed "s/^ *//" | sed "s/ .*//")
+  grep Failed out > /dev/null && break
+done
+
+doit ic ce buildrun logs --instance $instance
+
+comment "Cleaning..."
+cleanup
